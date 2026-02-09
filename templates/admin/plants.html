@@ -1,0 +1,175 @@
+{% extends 'base.html' %}
+{% block content %}
+<h4>Planteles</h4>
+<div class="row g-3 mb-4">
+  <div class="col-md-7">
+    <div class="card"><div class="card-body">
+      <h6>Agregar Plantel</h6>
+      <form method="post" class="row g-2">
+        <div class="col-md-6"><input name="name" class="form-control" placeholder="Nombre" required></div>
+        <div class="col-md-4"><input name="cct" class="form-control" placeholder="CCT" required></div>
+        <div class="col-md-2"><button class="btn btn-primary w-100" type="submit">Agregar</button></div>
+      </form>
+    </div></div>
+  </div>
+  <div class="col-md-5">
+    <div class="card"><div class="card-body">
+      <h6>Estadísticas de Folios</h6>
+      <div class="row g-2">
+        <div class="col-12">
+          <div class="border p-2 mb-2">
+            <small class="text-muted">Total agregado</small>
+            <div class="fw-bold">{{ "{:,}".format(total_stats.total_added or 0) }}</div>
+          </div>
+        </div>
+        <div class="col-12">
+          <div class="border p-2 mb-2">
+            <small class="text-muted">Total asignados</small>
+            <div class="fw-bold">{{ "{:,}".format(total_stats.total_assigned or 0) }}</div>
+          </div>
+        </div>
+        <div class="col-12">
+          <div class="border p-2">
+            <small class="text-muted">Total restantes</small>
+            <div class="fw-bold text-success">{{ "{:,}".format(total_stats.total_remaining or 0) }}</div>
+          </div>
+        </div>
+      </div>
+    </div></div>
+  </div>
+</div>
+<table class="table table-sm table-striped">
+  <thead>
+    <tr>
+      <th><a href="{{ url_for('admin_plants', sort='name', order='asc' if not (sort == 'name' and order == 'asc') else 'desc') }}" class="text-decoration-none">Nombre {% if sort == 'name' %}{% if order == 'asc' %}↑{% else %}↓{% endif %}{% endif %}</a></th>
+      <th><a href="{{ url_for('admin_plants', sort='cct', order='asc' if not (sort == 'cct' and order == 'asc') else 'desc') }}" class="text-decoration-none">CCT {% if sort == 'cct' %}{% if order == 'asc' %}↑{% else %}↓{% endif %}{% endif %}</a></th>
+      <th><a href="{{ url_for('admin_plants', sort='assigned_folios', order='asc' if not (sort == 'assigned_folios' and order == 'asc') else 'desc') }}" class="text-decoration-none">Folios asignados {% if sort == 'assigned_folios' %}{% if order == 'asc' %}↑{% else %}↓{% endif %}{% endif %}</a></th>
+      <th><a href="{{ url_for('admin_plants', sort='active_series', order='asc' if not (sort == 'active_series' and order == 'asc') else 'desc') }}" class="text-decoration-none">Series activas {% if sort == 'active_series' %}{% if order == 'asc' %}↑{% else %}↓{% endif %}{% endif %}</a></th>
+      <th>Acciones</th>
+      <th>Eliminar</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for p in plants %}
+    <tr>
+      <td contenteditable="true" data-plant-id="{{ p.id }}" data-field="name" class="editable-cell">{{ p.name }}</td>
+      <td contenteditable="true" data-plant-id="{{ p.id }}" data-field="cct" class="editable-cell">{{ p.cct }}</td>
+      <td>{{ "{:,}".format(p.assigned_folios or 0) }}</td>
+      <td>{{ p.active_series or 'Sin series' }}</td>
+      <td>
+        <a href="{{ url_for('plant_detail', plant_id=p.id) }}" class="btn btn-sm btn-outline-success">Ver Detalle</a>
+        <button class="btn btn-sm btn-outline-primary save-btn" onclick="savePlantInline('{{ p.id }}')">Guardar</button>
+        <a href="{{ url_for('admin_series') }}?plant={{ p.id }}&return_to=admin_plants" class="btn btn-sm btn-outline-info">Series</a>
+      </td>
+      <td>
+        <form method="post" action="{{ url_for('admin_delete_plant', plant_id=p.id) }}" onsubmit="return confirm('¿Eliminar plantel {{ p.name }} ({{ p.cct }})? Esta acción no se puede deshacer.');">
+          <button class="btn btn-sm btn-outline-danger" type="submit">Eliminar</button>
+        </form>
+      </td>
+    </tr>
+    {% else %}
+    <tr><td colspan="5" class="text-muted">Sin planteles</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+<style>
+.editable-cell {
+  background: #fffbe5;
+  cursor: text;
+  transition: background-color 0.2s;
+}
+.editable-cell:focus {
+  background: #fff3cd;
+  outline: 2px solid #ffc107;
+}
+.save-btn {
+  display: inline-block !important;
+}
+</style>
+<script>
+function savePlantInline(plantId) {
+  console.log('=== FRONTEND DEBUG: savePlantInline called with plantId =', plantId);
+  
+  const nameCell = document.querySelector(`[data-plant-id="${plantId}"][data-field="name"]`);
+  const cctCell = document.querySelector(`[data-plant-id="${plantId}"][data-field="cct"]`);
+  
+  if (!nameCell || !cctCell) {
+    alert('No se encontraron las celdas para editar');
+    return;
+  }
+  
+  const name = nameCell.textContent.trim();
+  const cct = cctCell.textContent.trim();
+  
+  if (!name || cct === undefined || cct === null) {
+    alert('Nombre y CCT no pueden estar vacíos');
+    return;
+  }
+  
+  const formData = new FormData();
+  formData.append('name', name);
+  formData.append('cct', cct);
+  formData.append('qty_total', 0); // Send 0 since we're not editing this field anymore
+  
+  const url = `/admin/plants/${plantId}/inline-update`;
+  console.log('=== FRONTEND DEBUG: URL =', url);
+  console.log('=== FRONTEND DEBUG: plantId =', plantId);
+  console.log('=== FRONTEND DEBUG: FormData =', Array.from(formData.entries()));
+  
+  fetch(url, {
+    method: 'POST',
+    body: formData,
+    headers: {
+      'X-Requested-With': 'XMLHttpRequest'
+    }
+  }).then(response => {
+    if (response.ok) {
+      response.json().then(data => {
+        if (data.success) {
+          // Force hard reload to avoid caching issues
+          window.location.href = window.location.href;
+        } else {
+          alert('Error al guardar: ' + (data.error || 'Error desconocido'));
+        }
+      }).catch(error => {
+        console.error('JSON parse error:', error);
+        alert('Error al procesar respuesta JSON: ' + error.message);
+        // Try to get raw response for debugging
+        response.clone().text().then(text => {
+          console.error('Raw response:', text);
+          alert('Respuesta cruda: ' + text);
+        });
+      });
+    } else {
+      console.error('HTTP error:', response.status, response.statusText);
+      alert('Error HTTP: ' + response.status + ' ' + response.statusText);
+      response.clone().text().then(text => {
+        console.error('Error response:', text);
+        alert('Respuesta de error: ' + text);
+      });
+    }
+  }).catch(error => {
+    console.error('Network error:', error);
+    alert('Error de red: ' + error.message);
+  });
+}
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.editable-cell').forEach(cell => {
+    const initialValue = cell.textContent.trim();
+    cell.addEventListener('input', () => {
+      const row = cell.closest('tr');
+      const saveBtn = row.querySelector('.save-btn');
+      if (cell.textContent.trim() !== initialValue) {
+        saveBtn.style.display = 'inline-block';
+      } else {
+        // check if any other cell in the row is modified
+        const modified = Array.from(row.querySelectorAll('.editable-cell')).some(c => c.textContent.trim() !== c.dataset.original);
+        saveBtn.style.display = modified ? 'inline-block' : 'none';
+      }
+    });
+    // store original value
+    cell.dataset.original = initialValue;
+  });
+});
+</script>
+{% endblock %}

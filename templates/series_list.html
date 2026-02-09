@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% block content %}
+<h4>Series</h4>
+<!-- Debug info -->
+<div class="alert alert-info">
+  <small>
+    Debug: rows={{ rows|length }}, q="{{ q }}", plant_id="{{ plant_id }}"
+  </small>
+</div>
+<form method="get" class="row g-2 mb-3">
+  <div class="col-md-6">
+    <input name="q" value="{{ q }}" class="form-control" placeholder="Buscar serie">
+    {% if request.args.get('return_to') %}
+    <input type="hidden" name="return_to" value="{{ request.args.get('return_to') }}">
+    {% endif %}
+    {% if request.args.get('plant') %}
+    <input type="hidden" name="plant" value="{{ request.args.get('plant') }}">
+    {% endif %}
+  </div>
+  <div class="col-md-2">
+    <button class="btn btn-primary w-100">Buscar</button>
+  </div>
+</form>
+<table class="table table-sm table-striped">
+  <thead>
+    <tr>
+      <th>Nombre</th>
+      <th>Restantes</th>
+      <th>Total agregado</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for r in rows %}
+    <tr>
+      <td><a href="{{ url_for('series_detail', series_id=r.id) }}">{{ r.name }}</a></td>
+      <td>{{ r.remaining }}</td>
+      <td>{{ r.total_added }}</td>
+      <td>
+        <a class="btn btn-sm btn-outline-success" href="{{ url_for('select_series', series_id=r.id, return_to=request.args.get('return_to'), plant=request.args.get('plant')) }}">Seleccionar</a>
+      </td>
+    </tr>
+    {% else %}
+    <tr><td colspan="4" class="text-muted">Sin resultados</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
