@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h4 class="mb-3">Bienvenido, {{ user.username }}</h4>
+
+<div class="row g-3">
+  {% if session.get('role') == 'standard' %}
+  <div class="col-md-4">
+    <div class="card h-100">
+      <div class="card-body">
+        <h5 class="card-title">Planteles</h5>
+        <p class="card-text">Buscar plantel por nombre o CCT y asignar folios.</p>
+        <a class="btn btn-outline-primary" href="{{ url_for('standard_search') }}">Ir a Planteles</a>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+  {% if session.get('role') == 'supervisor' %}
+  <div class="col-md-4">
+    <div class="card h-100">
+      <div class="card-body">
+        <h5 class="card-title">Planteles</h5>
+        <p class="card-text">Buscar plantel por nombre o CCT y asignar folios.</p>
+        <a class="btn btn-outline-primary" href="{{ url_for('standard_search') }}">Ir a Planteles</a>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card h-100">
+      <div class="card-body">
+        <h5 class="card-title">Series</h5>
+        <p class="card-text">Ver listado de series y planteles con movimientos.</p>
+        <a class="btn btn-outline-info" href="{{ url_for('supervisor_series') }}">Ir a Series</a>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+  {% if session.get('role') == 'admin' %}
+  <div class="col-md-4">
+    <div class="card h-100">
+      <div class="card-body">
+        <h5 class="card-title">Administración</h5>
+        <p class="card-text">Gestionar usuarios, series, planteles y movimientos.</p>
+        <a class="btn btn-outline-dark" href="{{ url_for('admin_dashboard') }}">Panel Admin</a>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

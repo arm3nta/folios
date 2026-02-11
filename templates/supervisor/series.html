@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block content %}
+<h4>Series</h4>
+
+<table class="table table-sm table-striped">
+  <thead>
+    <tr>
+      <th>Nombre</th>
+      <th>Total</th>
+      <th>Restantes</th>
+      <th>Siguiente</th>
+      <th>Folio inicial</th>
+      <th>Folio final</th>
+      <th>Fecha</th>
+      <th>Detalle</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for r in rows %}
+    <tr>
+      <td>{{ r.name }}</td>
+      <td>{{ r.total_added }}</td>
+      <td>{{ "{:,}".format(r.calculated_remaining) }}</td>
+      <td>{{ r.next_folio }}</td>
+      <td>{{ r.first_folio or '-' }}</td>
+      <td>{{ r.last_folio or '-' }}</td>
+      <td>{{ format_date(r.created_at) }}</td>
+      <td><a class="btn btn-sm btn-outline-secondary" href="{{ url_for('series_detail', series_id=r.id) }}">Ver</a></td>
+    </tr>
+    {% else %}
+    <tr><td colspan="8" class="text-muted">Sin series</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

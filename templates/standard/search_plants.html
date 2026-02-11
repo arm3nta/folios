@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% block content %}
+<h4>Buscar Plantel / CCT</h4>
+<!-- Cache busting: {{ timestamp }} -->
+<form method="post" class="row g-2 mb-3" id="searchForm">
+  <div class="col-md-5">
+    <input name="term" class="form-control" placeholder="Nombre del plantel o CCT">
+  </div>
+  <div class="col-md-2">
+    <button class="btn btn-primary w-100" type="submit">Buscar</button>
+  </div>
+  <div class="col-md-2">
+    <button class="btn btn-success w-100" type="button" onclick="document.getElementById('addPanel').classList.toggle('d-none')">Agregar</button>
+  </div>
+</form>
+
+<form method="post" class="card card-body d-none mb-3" id="addPanel">
+  <input type="hidden" name="action" value="add">
+  <div class="row g-2">
+    <div class="col-md-5">
+      <input name="name" class="form-control" placeholder="Nombre del plantel" required>
+    </div>
+    <div class="col-md-3">
+      <input name="cct" class="form-control" placeholder="CCT" required>
+    </div>
+    <div class="col-md-2">
+      <button class="btn btn-success w-100" type="submit">Guardar</button>
+    </div>
+  </div>
+</form>
+<table class="table table-sm table-striped">
+  <thead>
+    <tr>
+      <th><a href="{{ url_for('standard_search', q=q, sort='name', order='asc' if not (sort == 'name' and order == 'asc') else 'desc') }}" class="text-decoration-none">Nombre {% if sort == 'name' %}{% if order == 'asc' %}↑{% else %}↓{% endif %}{% endif %}</a></th>
+      <th><a href="{{ url_for('standard_search', q=q, sort='assigned_total', order='asc' if not (sort == 'assigned_total' and order == 'asc') else 'desc') }}" class="text-decoration-none">Folios Asignados {% if sort == 'assigned_total' %}{% if order == 'asc' %}↑{% else %}↓{% endif %}{% endif %}</a></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for p in plants %}
+    <tr>
+      <td>{{ p.name }}</td>
+      <td>{{ p.assigned_total or 0 }}</td>
+      <td><a class="btn btn-sm btn-outline-primary" href="{{ url_for('plant_detail', plant_id=p.id) }}">SELECCIONAR PLANTEL</a></td>
+    </tr>
+    {% else %}
+    <tr><td colspan="3" class="text-muted">Sin resultados</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
