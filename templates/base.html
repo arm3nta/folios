@@ -55,6 +55,15 @@
   {% block content %}{% endblock %}
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+function togglePassword(fieldId) {
+  const input = document.getElementById(fieldId);
+  input.type = input.type === "password" ? "text" : "password";
+}
+</script>
+  
 </body>
 </html>
+
 
