@@ -10,7 +10,14 @@
       </div>
       <div class="mb-3">
         <label class="form-label">Contraseña</label>
-        <input name="password" type="password" class="form-control">
+        
+        <div class="input-group">
+          <input id="password" name="password" type="password" class="form-control">
+          <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('password')">
+          👁
+          </button>
+        </div>
+
       </div>
       <button class="btn btn-primary w-100" type="submit">Entrar</button>
     </form>
@@ -20,3 +27,4 @@
   </div>
 </div>
 {% endblock %}
+
